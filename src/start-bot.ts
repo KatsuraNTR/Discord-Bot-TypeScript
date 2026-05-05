@@ -3,7 +3,18 @@ import { Options, Partials } from 'discord.js';
 import { createRequire } from 'node:module';
 
 import { Button } from './buttons/index.js';
-import { DevCommand, HelpCommand, InfoCommand, TestCommand } from './commands/chat/index.js';
+import {
+    DevCommand,
+    HelpCommand,
+    InfoCommand,
+    TestCommand,
+    WelcomeDisableCommand,
+    WelcomeEnableCommand,
+    WelcomeImageCommand,
+    WelcomeMessageCommand,
+    WelcomeStatusCommand,
+    WelcomeTestCommand,
+} from './commands/chat/index.js';
 import {
     ChatCommandMetadata,
     Command,
@@ -17,6 +28,7 @@ import {
     CommandHandler,
     GuildJoinHandler,
     GuildLeaveHandler,
+    GuildMemberAddHandler,
     MessageHandler,
     ReactionHandler,
     TriggerHandler,
@@ -30,6 +42,7 @@ import {
     EventDataService,
     JobService,
     Logger,
+    WelcomeSettingsService,
 } from './services/index.js';
 import { Trigger } from './triggers/index.js';
 
@@ -40,6 +53,7 @@ let Logs = require('../lang/logs.json');
 async function start(): Promise<void> {
     // Services
     let eventDataService = new EventDataService();
+    let welcomeSettingsService = new WelcomeSettingsService();
 
     // Client
     let client = new CustomClient({
@@ -61,6 +75,12 @@ async function start(): Promise<void> {
         new HelpCommand(),
         new InfoCommand(),
         new TestCommand(),
+        new WelcomeEnableCommand(welcomeSettingsService),
+        new WelcomeDisableCommand(welcomeSettingsService),
+        new WelcomeStatusCommand(welcomeSettingsService),
+        new WelcomeMessageCommand(welcomeSettingsService),
+        new WelcomeImageCommand(welcomeSettingsService),
+        new WelcomeTestCommand(welcomeSettingsService),
 
         // Message Context Commands
         new ViewDateSent(),
@@ -89,6 +109,7 @@ async function start(): Promise<void> {
     // Event handlers
     let guildJoinHandler = new GuildJoinHandler(eventDataService);
     let guildLeaveHandler = new GuildLeaveHandler();
+    let guildMemberAddHandler = new GuildMemberAddHandler(eventDataService, welcomeSettingsService);
     let commandHandler = new CommandHandler(commands, eventDataService);
     let buttonHandler = new ButtonHandler(buttons, eventDataService);
     let triggerHandler = new TriggerHandler(triggers, eventDataService);
@@ -106,6 +127,7 @@ async function start(): Promise<void> {
         client,
         guildJoinHandler,
         guildLeaveHandler,
+        guildMemberAddHandler,
         messageHandler,
         commandHandler,
         buttonHandler,

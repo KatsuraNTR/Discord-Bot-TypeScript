@@ -125,6 +125,58 @@
                         ]
                     }
                 ]
+            },
+            "memberWelcome": {
+                "title": "Welcome to {{SERVER}}!",
+                "description": "{{MESSAGE}}",
+                "fields": [
+                    {
+                        "name": "Member Count",
+                        "value": "{{MEMBER_COUNT}}",
+                        "inline": true
+                    }
+                ],
+                "color": "{{COM:colors.default}}",
+                "timestamp": true
+            },
+            "welcomeEnabled": {
+                "description": "Welcome messages are enabled in {{CHANNEL}}.",
+                "color": "{{COM:colors.success}}"
+            },
+            "welcomeDisabled": {
+                "description": "Welcome messages are disabled.",
+                "color": "{{COM:colors.success}}"
+            },
+            "welcomeStatus": {
+                "title": "Welcome Messages",
+                "fields": [
+                    {
+                        "name": "Enabled",
+                        "value": "{{ENABLED}}",
+                        "inline": true
+                    },
+                    {
+                        "name": "Channel",
+                        "value": "{{CHANNEL}}",
+                        "inline": true
+                    },
+                    {
+                        "name": "Message",
+                        "value": "{{MESSAGE}}"
+                    },
+                    {
+                        "name": "Image URL",
+                        "value": "{{IMAGE_URL}}"
+                    }
+                ]
+            },
+            "welcomeMessageUpdated": {
+                "description": "Welcome message updated.",
+                "color": "{{COM:colors.success}}"
+            },
+            "welcomeImageUpdated": {
+                "description": "Welcome image updated.",
+                "color": "{{COM:colors.success}}"
             }
         },
         "validationEmbeds": {
@@ -142,6 +194,14 @@
                     "",
                     "Required permissions: {{PERMISSIONS}}"
                 ],
+                "color": "{{COM:colors.warning}}"
+            },
+            "guildOnly": {
+                "description": "This command can only be used in a server.",
+                "color": "{{COM:colors.warning}}"
+            },
+            "welcomeMissingChannelPerms": {
+                "description": "I need permission to view the selected channel, send messages, and embed links there.",
                 "color": "{{COM:colors.warning}}"
             }
         },
@@ -192,7 +252,8 @@
             "dev": "dev",
             "help": "help",
             "info": "info",
-            "test": "test"
+            "test": "test",
+            "welcome": "welcome"
         },
         "userCommands": {
             "viewDateJoined": "View Date Joined"
@@ -201,19 +262,45 @@
             "viewDateSent": "View Date Sent"
         },
         "arguments": {
+            "channel": "channel",
             "command": "command",
-            "option": "option"
+            "option": "option",
+            "text": "text",
+            "url": "url"
         },
         "commandDescs": {
             "dev": "Developer use only.",
             "help": "Find help or contact support.",
             "info": "View bot info.",
-            "test": "Run the test command."
+            "test": "Run the test command.",
+            "welcome": "Configure member welcome messages."
         },
         "argDescs": {
             "devCommand": "Command.",
             "helpOption": "Option.",
-            "infoOption": "Option."
+            "infoOption": "Option.",
+            "welcomeChannel": "Channel where welcome messages should be sent.",
+            "welcomeImageUrl": "Image or GIF URL to show in welcome embeds.",
+            "welcomeMessage": "Text for the welcome embed. Supports user and server placeholders."
+        },
+        "welcome": {
+            "defaultMessage": "Welcome {{USER}} to {{SERVER}}!"
+        },
+        "welcomeSubcommands": {
+            "enable": "enable",
+            "disable": "disable",
+            "status": "status",
+            "message": "message",
+            "image": "image",
+            "test": "test"
+        },
+        "welcomeSubcommandDescs": {
+            "enable": "Enable welcome messages.",
+            "disable": "Disable welcome messages.",
+            "status": "View welcome message settings.",
+            "message": "Set the welcome message text.",
+            "image": "Set the welcome embed image or GIF URL.",
+            "test": "Preview the welcome embed."
         },
         "fields": {
             "commands": "Commands",

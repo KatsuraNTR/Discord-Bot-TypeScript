@@ -27,7 +27,8 @@
         "guildLeft": "Guild '{GUILD_NAME}' ({GUILD_ID}) left."
     },
     "warn": {
-        "managerNoShards": "No shards to spawn."
+        "managerNoShards": "No shards to spawn.",
+        "memberWelcomeNoChannel": "Could not send member welcome message in guild '{GUILD_NAME}' ({GUILD_ID}) because no usable channel was configured."
     },
     "error": {
         "unspecified": "An unspecified error occurred.",
@@ -44,6 +45,7 @@
         "updatedServerCountSite": "An error occurred while updating the server count on '{BOT_SITE}'.",
         "guildJoin": "An error occurred while processing a guild join.",
         "guildLeave": "An error occurred while processing a guild leave.",
+        "guildMemberAdd": "An error occurred while processing a guild member add.",
         "message": "An error occurred while processing a message.",
         "reaction": "An error occurred while processing a reaction.",
         "command": "An error occurred while processing a command interaction.",

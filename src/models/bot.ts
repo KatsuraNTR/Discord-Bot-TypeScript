@@ -5,6 +5,7 @@ import {
     CommandInteraction,
     Events,
     Guild,
+    GuildMember,
     Interaction,
     Message,
     MessageReaction,
@@ -21,6 +22,7 @@ import {
     CommandHandler,
     GuildJoinHandler,
     GuildLeaveHandler,
+    GuildMemberAddHandler,
     MessageHandler,
     ReactionHandler,
 } from '../events/index.js';
@@ -40,6 +42,7 @@ export class Bot {
         private client: Client,
         private guildJoinHandler: GuildJoinHandler,
         private guildLeaveHandler: GuildLeaveHandler,
+        private guildMemberAddHandler: GuildMemberAddHandler,
         private messageHandler: MessageHandler,
         private commandHandler: CommandHandler,
         private buttonHandler: ButtonHandler,
@@ -59,6 +62,9 @@ export class Bot {
         );
         this.client.on(Events.GuildCreate, (guild: Guild) => this.onGuildJoin(guild));
         this.client.on(Events.GuildDelete, (guild: Guild) => this.onGuildLeave(guild));
+        this.client.on(Events.GuildMemberAdd, (member: GuildMember) =>
+            this.onGuildMemberAdd(member)
+        );
         this.client.on(Events.MessageCreate, (msg: Message) => this.onMessage(msg));
         this.client.on(Events.InteractionCreate, (intr: Interaction) => this.onInteraction(intr));
         this.client.on(
@@ -117,6 +123,18 @@ export class Bot {
             await this.guildLeaveHandler.process(guild);
         } catch (error) {
             Logger.error(Logs.error.guildLeave, error);
+        }
+    }
+
+    private async onGuildMemberAdd(member: GuildMember): Promise<void> {
+        if (!this.ready || Debug.dummyMode.enabled) {
+            return;
+        }
+
+        try {
+            await this.guildMemberAddHandler.process(member);
+        } catch (error) {
+            Logger.error(Logs.error.guildMemberAdd, error);
         }
     }
 

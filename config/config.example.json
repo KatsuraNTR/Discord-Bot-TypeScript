@@ -5,6 +5,7 @@
         "token": "<DISCORD_BOT_TOKEN>",
         "intents": [
             "Guilds",
+            "GuildMembers",
             "GuildMessages",
             "GuildMessageReactions",
             "DirectMessages",
@@ -52,6 +53,12 @@
             "runOnce": false,
             "initialDelaySecs": 0
         }
+    },
+    "welcome": {
+        "dataFilePath": "data/welcome-settings.json",
+        "defaultMessage": "Welcome {{USER}} to {{SERVER}}!",
+        "defaultImageUrl": "",
+        "ignoreBots": false
     },
     "rateLimiting": {
         "commands": {
