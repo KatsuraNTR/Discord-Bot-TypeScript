@@ -6,3 +6,5 @@ export { Lang } from './lang.js';
 export { Logger } from './logger.js';
 export { MasterApiService } from './master-api-service.js';
 export { WelcomeSettingsService } from './welcome-settings-service.js';
+export { YouTubeService } from './youtube-service.js';
+export type { YouTubeNotifyType, YouTubeVideoType } from './youtube-service.js';

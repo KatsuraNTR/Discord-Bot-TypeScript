@@ -177,6 +177,22 @@
             "welcomeImageUpdated": {
                 "description": "Welcome image updated.",
                 "color": "{{COM:colors.success}}"
+            },
+            "youtubeSubscribed": {
+                "description": "Subscribed to **{{YOUTUBE_CHANNEL}}** in {{CHANNEL}} for `{{NOTIFY}}` notifications.\nSubscription ID: `{{SUBSCRIPTION_ID}}`",
+                "color": "{{COM:colors.success}}"
+            },
+            "youtubeUnsubscribed": {
+                "description": "Unsubscribed from **{{YOUTUBE_CHANNEL}}**.",
+                "color": "{{COM:colors.success}}"
+            },
+            "youtubeList": {
+                "title": "YouTube Subscriptions",
+                "description": "{{SUBSCRIPTIONS}}"
+            },
+            "youtubeChecked": {
+                "description": "YouTube check complete. Sent {{COUNT}} notification(s).",
+                "color": "{{COM:colors.success}}"
             }
         },
         "validationEmbeds": {
@@ -202,6 +218,14 @@
             },
             "welcomeMissingChannelPerms": {
                 "description": "I need permission to view the selected channel, send messages, and embed links there.",
+                "color": "{{COM:colors.warning}}"
+            },
+            "youtubeMissingChannelPerms": {
+                "description": "I need permission to view the selected channel, send messages, and embed links there.",
+                "color": "{{COM:colors.warning}}"
+            },
+            "youtubeSubscriptionNotFound": {
+                "description": "I couldn't find that YouTube subscription.",
                 "color": "{{COM:colors.warning}}"
             }
         },
@@ -253,7 +277,8 @@
             "help": "help",
             "info": "info",
             "test": "test",
-            "welcome": "welcome"
+            "welcome": "welcome",
+            "youtube": "youtube"
         },
         "userCommands": {
             "viewDateJoined": "View Date Joined"
@@ -265,15 +290,19 @@
             "channel": "channel",
             "command": "command",
             "option": "option",
+            "notify": "notify",
+            "subscription": "subscription",
             "text": "text",
-            "url": "url"
+            "url": "url",
+            "youtubeChannel": "youtube-channel"
         },
         "commandDescs": {
             "dev": "Developer use only.",
             "help": "Find help or contact support.",
             "info": "View bot info.",
             "test": "Run the test command.",
-            "welcome": "Configure member welcome messages."
+            "welcome": "Configure member welcome messages.",
+            "youtube": "Configure YouTube upload and live stream notifications."
         },
         "argDescs": {
             "devCommand": "Command.",
@@ -281,7 +310,11 @@
             "infoOption": "Option.",
             "welcomeChannel": "Channel where welcome messages should be sent.",
             "welcomeImageUrl": "Image or GIF URL to show in welcome embeds.",
-            "welcomeMessage": "Text for the welcome embed. Supports user and server placeholders."
+            "welcomeMessage": "Text for the welcome embed. Supports user and server placeholders.",
+            "youtubeChannel": "YouTube channel ID or URL.",
+            "youtubeDiscordChannel": "Discord channel where YouTube notifications should be sent.",
+            "youtubeNotify": "Which YouTube content types should trigger notifications.",
+            "youtubeSubscription": "Subscription ID, YouTube channel ID, or exact YouTube channel title."
         },
         "welcome": {
             "defaultMessage": "Welcome {{USER}} to {{SERVER}}!"
@@ -301,6 +334,29 @@
             "message": "Set the welcome message text.",
             "image": "Set the welcome embed image or GIF URL.",
             "test": "Preview the welcome embed."
+        },
+        "youtube": {
+            "noSubscriptions": "No YouTube subscriptions configured."
+        },
+        "youtubeSubcommands": {
+            "subscribe": "subscribe",
+            "unsubscribe": "unsubscribe",
+            "list": "list",
+            "check": "check",
+            "test": "test"
+        },
+        "youtubeSubcommandDescs": {
+            "subscribe": "Subscribe a Discord channel to a YouTube channel.",
+            "unsubscribe": "Remove a YouTube subscription.",
+            "list": "List YouTube subscriptions for this server.",
+            "check": "Check YouTube now and send any due notifications.",
+            "test": "Preview a YouTube notification."
+        },
+        "youtubeNotifyTypes": {
+            "all": "All new videos and live streams",
+            "videos": "Videos only",
+            "live": "Live now only",
+            "upcomingLive": "Upcoming live streams only"
         },
         "fields": {
             "commands": "Commands",

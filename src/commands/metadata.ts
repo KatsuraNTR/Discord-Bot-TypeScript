@@ -174,6 +174,145 @@ export const ChatCommandMetadata: {
             },
         ],
     },
+    YOUTUBE: {
+        type: ApplicationCommandType.ChatInput,
+        name: Lang.getRef('chatCommands.youtube', Language.Default),
+        name_localizations: Lang.getRefLocalizationMap('chatCommands.youtube'),
+        description: Lang.getRef('commandDescs.youtube', Language.Default),
+        description_localizations: Lang.getRefLocalizationMap('commandDescs.youtube'),
+        dm_permission: false,
+        default_member_permissions: PermissionsBitField.resolve([
+            PermissionFlagsBits.ManageGuild,
+        ]).toString(),
+        options: [
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: Lang.getRef('youtubeSubcommands.subscribe', Language.Default),
+                name_localizations: Lang.getRefLocalizationMap('youtubeSubcommands.subscribe'),
+                description: Lang.getRef('youtubeSubcommandDescs.subscribe', Language.Default),
+                description_localizations: Lang.getRefLocalizationMap(
+                    'youtubeSubcommandDescs.subscribe'
+                ),
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: Lang.getRef('arguments.youtubeChannel', Language.Default),
+                        name_localizations: Lang.getRefLocalizationMap('arguments.youtubeChannel'),
+                        description: Lang.getRef('argDescs.youtubeChannel', Language.Default),
+                        description_localizations: Lang.getRefLocalizationMap(
+                            'argDescs.youtubeChannel'
+                        ),
+                        required: true,
+                    },
+                    {
+                        type: ApplicationCommandOptionType.Channel,
+                        name: Lang.getRef('arguments.channel', Language.Default),
+                        name_localizations: Lang.getRefLocalizationMap('arguments.channel'),
+                        description: Lang.getRef('argDescs.youtubeDiscordChannel', Language.Default),
+                        description_localizations: Lang.getRefLocalizationMap(
+                            'argDescs.youtubeDiscordChannel'
+                        ),
+                        channel_types: [ChannelType.GuildText],
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: Lang.getRef('arguments.notify', Language.Default),
+                        name_localizations: Lang.getRefLocalizationMap('arguments.notify'),
+                        description: Lang.getRef('argDescs.youtubeNotify', Language.Default),
+                        description_localizations: Lang.getRefLocalizationMap(
+                            'argDescs.youtubeNotify'
+                        ),
+                        choices: [
+                            {
+                                name: Lang.getRef('youtubeNotifyTypes.all', Language.Default),
+                                name_localizations:
+                                    Lang.getRefLocalizationMap('youtubeNotifyTypes.all'),
+                                value: 'all',
+                            },
+                            {
+                                name: Lang.getRef('youtubeNotifyTypes.videos', Language.Default),
+                                name_localizations:
+                                    Lang.getRefLocalizationMap('youtubeNotifyTypes.videos'),
+                                value: 'videos',
+                            },
+                            {
+                                name: Lang.getRef('youtubeNotifyTypes.live', Language.Default),
+                                name_localizations:
+                                    Lang.getRefLocalizationMap('youtubeNotifyTypes.live'),
+                                value: 'live',
+                            },
+                            {
+                                name: Lang.getRef(
+                                    'youtubeNotifyTypes.upcomingLive',
+                                    Language.Default
+                                ),
+                                name_localizations: Lang.getRefLocalizationMap(
+                                    'youtubeNotifyTypes.upcomingLive'
+                                ),
+                                value: 'upcoming_live',
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: Lang.getRef('youtubeSubcommands.unsubscribe', Language.Default),
+                name_localizations: Lang.getRefLocalizationMap('youtubeSubcommands.unsubscribe'),
+                description: Lang.getRef('youtubeSubcommandDescs.unsubscribe', Language.Default),
+                description_localizations: Lang.getRefLocalizationMap(
+                    'youtubeSubcommandDescs.unsubscribe'
+                ),
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: Lang.getRef('arguments.subscription', Language.Default),
+                        name_localizations: Lang.getRefLocalizationMap('arguments.subscription'),
+                        description: Lang.getRef('argDescs.youtubeSubscription', Language.Default),
+                        description_localizations: Lang.getRefLocalizationMap(
+                            'argDescs.youtubeSubscription'
+                        ),
+                        required: true,
+                    },
+                ],
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: Lang.getRef('youtubeSubcommands.list', Language.Default),
+                name_localizations: Lang.getRefLocalizationMap('youtubeSubcommands.list'),
+                description: Lang.getRef('youtubeSubcommandDescs.list', Language.Default),
+                description_localizations: Lang.getRefLocalizationMap('youtubeSubcommandDescs.list'),
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: Lang.getRef('youtubeSubcommands.check', Language.Default),
+                name_localizations: Lang.getRefLocalizationMap('youtubeSubcommands.check'),
+                description: Lang.getRef('youtubeSubcommandDescs.check', Language.Default),
+                description_localizations: Lang.getRefLocalizationMap(
+                    'youtubeSubcommandDescs.check'
+                ),
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: Lang.getRef('youtubeSubcommands.test', Language.Default),
+                name_localizations: Lang.getRefLocalizationMap('youtubeSubcommands.test'),
+                description: Lang.getRef('youtubeSubcommandDescs.test', Language.Default),
+                description_localizations: Lang.getRefLocalizationMap('youtubeSubcommandDescs.test'),
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: Lang.getRef('arguments.subscription', Language.Default),
+                        name_localizations: Lang.getRefLocalizationMap('arguments.subscription'),
+                        description: Lang.getRef('argDescs.youtubeSubscription', Language.Default),
+                        description_localizations: Lang.getRefLocalizationMap(
+                            'argDescs.youtubeSubscription'
+                        ),
+                        required: true,
+                    },
+                ],
+            },
+        ],
+    },
 };
 
 export const MessageCommandMetadata: {

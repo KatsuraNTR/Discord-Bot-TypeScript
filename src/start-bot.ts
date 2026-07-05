@@ -14,6 +14,11 @@ import {
     WelcomeMessageCommand,
     WelcomeStatusCommand,
     WelcomeTestCommand,
+    YouTubeCheckCommand,
+    YouTubeListCommand,
+    YouTubeSubscribeCommand,
+    YouTubeTestCommand,
+    YouTubeUnsubscribeCommand,
 } from './commands/chat/index.js';
 import {
     ChatCommandMetadata,
@@ -34,7 +39,7 @@ import {
     TriggerHandler,
 } from './events/index.js';
 import { CustomClient } from './extensions/index.js';
-import { Job } from './jobs/index.js';
+import { Job, YouTubeNotificationJob } from './jobs/index.js';
 import { Bot } from './models/bot.js';
 import { Reaction } from './reactions/index.js';
 import {
@@ -43,6 +48,7 @@ import {
     JobService,
     Logger,
     WelcomeSettingsService,
+    YouTubeService,
 } from './services/index.js';
 import { Trigger } from './triggers/index.js';
 
@@ -54,6 +60,7 @@ async function start(): Promise<void> {
     // Services
     let eventDataService = new EventDataService();
     let welcomeSettingsService = new WelcomeSettingsService();
+    let youtubeService = new YouTubeService();
 
     // Client
     let client = new CustomClient({
@@ -81,6 +88,11 @@ async function start(): Promise<void> {
         new WelcomeMessageCommand(welcomeSettingsService),
         new WelcomeImageCommand(welcomeSettingsService),
         new WelcomeTestCommand(welcomeSettingsService),
+        new YouTubeSubscribeCommand(youtubeService),
+        new YouTubeUnsubscribeCommand(youtubeService),
+        new YouTubeListCommand(youtubeService),
+        new YouTubeCheckCommand(youtubeService),
+        new YouTubeTestCommand(youtubeService),
 
         // Message Context Commands
         new ViewDateSent(),
@@ -118,6 +130,7 @@ async function start(): Promise<void> {
 
     // Jobs
     let jobs: Job[] = [
+        new YouTubeNotificationJob(client, youtubeService),
         // TODO: Add new jobs here
     ];
 

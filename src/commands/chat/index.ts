@@ -10,3 +10,10 @@ export {
     WelcomeStatusCommand,
     WelcomeTestCommand,
 } from './welcome-command.js';
+export {
+    YouTubeCheckCommand,
+    YouTubeListCommand,
+    YouTubeSubscribeCommand,
+    YouTubeTestCommand,
+    YouTubeUnsubscribeCommand,
+} from './youtube-command.js';

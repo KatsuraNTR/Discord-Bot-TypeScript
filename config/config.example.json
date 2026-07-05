@@ -52,7 +52,17 @@
             "log": false,
             "runOnce": false,
             "initialDelaySecs": 0
+        },
+        "youtubeNotifications": {
+            "schedule": "0 */5 * * * *",
+            "log": false,
+            "runOnce": false,
+            "initialDelaySecs": 30
         }
+    },
+    "youtube": {
+        "apiKey": "",
+        "databaseFilePath": "data/youtube-subscriptions.sqlite"
     },
     "welcome": {
         "dataFilePath": "data/welcome-settings.json",
