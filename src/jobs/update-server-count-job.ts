@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 import { Job } from './index.js';
 import { CustomClient } from '../extensions/index.js';
 import { BotSite } from '../models/config-models.js';
-import { HttpService, Lang, Logger } from '../services/index.js';
+import { HttpService, Lang, Logger, PresenceSettingsService } from '../services/index.js';
 import { ShardUtils } from '../utils/index.js';
 
 const require = createRequire(import.meta.url);
@@ -23,26 +23,45 @@ export class UpdateServerCountJob extends Job {
 
     constructor(
         private shardManager: ShardingManager,
-        private httpService: HttpService
+        private httpService: HttpService,
+        private presenceSettingsService: PresenceSettingsService
     ) {
         super();
         this.botSites = BotSites.filter(botSite => botSite.enabled);
     }
 
     public async run(): Promise<void> {
+        let presenceSettings = await this.presenceSettingsService.get();
         let serverCount = await ShardUtils.serverCount(this.shardManager);
 
-        let type = ActivityType.Streaming;
-        let name = `to ${serverCount.toLocaleString()} servers`;
-        let url = Lang.getCom('links.stream');
+        if (presenceSettings.mode === 'manual' && presenceSettings.activity) {
+            await this.shardManager.broadcastEval(
+                (client, context) => {
+                    let customClient = client as CustomClient;
+                    return customClient.setPresence(context.activity, context.status);
+                },
+                {
+                    context: {
+                        activity: presenceSettings.activity,
+                        status: presenceSettings.status,
+                    },
+                }
+            );
+        } else {
+            let activity = {
+                type: ActivityType.Streaming,
+                name: `to ${serverCount.toLocaleString()} servers`,
+                url: Lang.getCom('links.stream'),
+            };
 
-        await this.shardManager.broadcastEval(
-            (client, context) => {
-                let customClient = client as CustomClient;
-                return customClient.setPresence(context.type, context.name, context.url);
-            },
-            { context: { type, name, url } }
-        );
+            await this.shardManager.broadcastEval(
+                (client, context) => {
+                    let customClient = client as CustomClient;
+                    return customClient.setPresence(context.activity);
+                },
+                { context: { activity } }
+            );
+        }
 
         Logger.info(
             Logs.info.updatedServerCount.replaceAll('{SERVER_COUNT}', serverCount.toLocaleString())

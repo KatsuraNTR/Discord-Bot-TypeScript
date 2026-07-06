@@ -47,6 +47,7 @@ import {
     EventDataService,
     JobService,
     Logger,
+    PresenceSettingsService,
     WelcomeSettingsService,
     YouTubeService,
 } from './services/index.js';
@@ -59,6 +60,7 @@ let Logs = require('../lang/logs.json');
 async function start(): Promise<void> {
     // Services
     let eventDataService = new EventDataService();
+    let presenceSettingsService = new PresenceSettingsService();
     let welcomeSettingsService = new WelcomeSettingsService();
     let youtubeService = new YouTubeService();
 
@@ -78,7 +80,7 @@ async function start(): Promise<void> {
     // Commands
     let commands: Command[] = [
         // Chat Commands
-        new DevCommand(),
+        new DevCommand(presenceSettingsService),
         new HelpCommand(),
         new InfoCommand(),
         new TestCommand(),

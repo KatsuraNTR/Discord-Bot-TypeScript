@@ -1,4 +1,4 @@
-import { IsDefined, IsEnum, IsString, IsUrl, Length } from 'class-validator';
+import { IsDefined, IsEnum, IsIn, IsOptional, IsString, IsUrl, Length } from 'class-validator';
 import { ActivityType } from 'discord.js';
 
 export interface GetShardsResponse {
@@ -28,7 +28,11 @@ export class SetShardPresencesRequest {
     @Length(1, 128)
     name: string;
 
-    @IsDefined()
+    @IsOptional()
     @IsUrl()
-    url: string;
+    url?: string;
+
+    @IsOptional()
+    @IsIn(['online', 'idle', 'dnd', 'invisible'])
+    status?: string;
 }

@@ -64,6 +64,9 @@
         "apiKey": "",
         "databaseFilePath": "data/youtube-subscriptions.sqlite"
     },
+    "presence": {
+        "dataFilePath": "data/presence-settings.json"
+    },
     "welcome": {
         "dataFilePath": "data/welcome-settings.json",
         "defaultMessage": "Welcome {{USER}} to {{SERVER}}!",

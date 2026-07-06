@@ -1,4 +1,4 @@
-import { ActivityType, ShardingManager } from 'discord.js';
+import { ActivityType, PresenceStatusData, ShardingManager } from 'discord.js';
 import { Request, Response, Router } from 'express';
 import { createRequire } from 'node:module';
 
@@ -66,15 +66,66 @@ export class ShardsController implements Controller {
 
     private async setShardPresences(req: Request, res: Response): Promise<void> {
         let reqBody: SetShardPresencesRequest = res.locals.input;
+        let activityType = ActivityType[reqBody.type];
+
+        if (activityType === ActivityType.Streaming && !reqBody.url) {
+            res.status(400).json({
+                error: true,
+                message: 'Streaming presence requires a stream URL.',
+            });
+            return;
+        }
+
+        if (activityType !== ActivityType.Streaming && reqBody.url) {
+            res.status(400).json({
+                error: true,
+                message: 'Presence URL is only supported for streaming activity.',
+            });
+            return;
+        }
+
+        if (reqBody.url && !this.isSupportedStreamingUrl(reqBody.url)) {
+            res.status(400).json({
+                error: true,
+                message: 'Streaming URL must be a Twitch or YouTube URL.',
+            });
+            return;
+        }
 
         await this.shardManager.broadcastEval(
             (client, context) => {
                 let customClient = client as CustomClient;
-                return customClient.setPresence(context.type, context.name, context.url);
+                return customClient.setPresence(context.activity, context.status);
             },
-            { context: { type: ActivityType[reqBody.type], name: reqBody.name, url: reqBody.url } }
+            {
+                context: {
+                    activity: {
+                        type: activityType,
+                        name: reqBody.name,
+                        url: reqBody.url,
+                    },
+                    status: reqBody.status as PresenceStatusData,
+                },
+            }
         );
 
         res.sendStatus(200);
+    }
+
+    private isSupportedStreamingUrl(url: string): boolean {
+        let hostname: string;
+        try {
+            hostname = new URL(url).hostname.toLowerCase();
+        } catch {
+            return false;
+        }
+
+        return (
+            hostname === 'twitch.tv' ||
+            hostname.endsWith('.twitch.tv') ||
+            hostname === 'youtube.com' ||
+            hostname.endsWith('.youtube.com') ||
+            hostname === 'youtu.be'
+        );
     }
 }

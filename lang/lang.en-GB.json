@@ -287,10 +287,13 @@
             "viewDateSent": "View Date Sent"
         },
         "arguments": {
+            "activityType": "activity-type",
             "channel": "channel",
             "command": "command",
+            "name": "name",
             "option": "option",
             "notify": "notify",
+            "status": "status",
             "subscription": "subscription",
             "text": "text",
             "url": "url",
@@ -308,6 +311,10 @@
             "devCommand": "Command.",
             "helpOption": "Option.",
             "infoOption": "Option.",
+            "presenceActivityType": "Discord activity type to show.",
+            "presenceName": "Activity text to show.",
+            "presenceStatus": "Online status to use.",
+            "presenceUrl": "Streaming URL. Required for streaming activity.",
             "welcomeChannel": "Channel where welcome messages should be sent.",
             "welcomeImageUrl": "Image or GIF URL to show in welcome embeds.",
             "welcomeMessage": "Text for the welcome embed. Supports user and server placeholders.",
@@ -417,6 +424,18 @@
         },
         "devCommandNames": {
             "info": "info"
+        },
+        "devSubcommands": {
+            "info": "info",
+            "presenceSet": "presence-set",
+            "presenceReset": "presence-reset",
+            "presenceStatus": "presence-status"
+        },
+        "devSubcommandDescs": {
+            "info": "View developer diagnostics.",
+            "presenceSet": "Set a manual bot presence.",
+            "presenceReset": "Return bot presence to automatic server count.",
+            "presenceStatus": "View current presence mode."
         },
         "helpOptions": {
             "contactSupport": "Contact Support",

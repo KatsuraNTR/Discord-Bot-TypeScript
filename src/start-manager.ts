@@ -6,7 +6,13 @@ import { GuildsController, RootController, ShardsController } from './controller
 import { Job, UpdateServerCountJob } from './jobs/index.js';
 import { Api } from './models/api.js';
 import { Manager } from './models/manager.js';
-import { HttpService, JobService, Logger, MasterApiService } from './services/index.js';
+import {
+    HttpService,
+    JobService,
+    Logger,
+    MasterApiService,
+    PresenceSettingsService,
+} from './services/index.js';
 import { MathUtils, ShardUtils } from './utils/index.js';
 
 const require = createRequire(import.meta.url);
@@ -20,6 +26,7 @@ async function start(): Promise<void> {
     // Dependencies
     let httpService = new HttpService();
     let masterApiService = new MasterApiService(httpService);
+    let presenceSettingsService = new PresenceSettingsService();
     if (Config.clustering.enabled) {
         await masterApiService.register();
     }
@@ -61,7 +68,9 @@ async function start(): Promise<void> {
 
     // Jobs
     let jobs: Job[] = [
-        Config.clustering.enabled ? undefined : new UpdateServerCountJob(shardManager, httpService),
+        Config.clustering.enabled
+            ? undefined
+            : new UpdateServerCountJob(shardManager, httpService, presenceSettingsService),
         // TODO: Add new jobs here
     ].filter(Boolean);
 
