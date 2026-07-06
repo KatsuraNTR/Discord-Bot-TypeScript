@@ -11,6 +11,8 @@ export type {
     PresenceMode,
     PresenceSettings,
 } from './presence-settings-service.js';
+export { PresenceUrlService } from './presence-url-service.js';
+export type { PresenceStreamingUrlResolution } from './presence-url-service.js';
 export { WelcomeSettingsService } from './welcome-settings-service.js';
 export { YouTubeService } from './youtube-service.js';
 export type { YouTubeNotifyType, YouTubeVideoType } from './youtube-service.js';

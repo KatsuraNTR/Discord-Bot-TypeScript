@@ -11,7 +11,12 @@ import { DevCommandName } from '../../enums/index.js';
 import { CustomClient } from '../../extensions/index.js';
 import { Language } from '../../models/enum-helpers/index.js';
 import { EventData } from '../../models/internal-models.js';
-import { Lang, PresenceActivitySettings, PresenceSettingsService } from '../../services/index.js';
+import {
+    Lang,
+    PresenceActivitySettings,
+    PresenceSettingsService,
+    PresenceUrlService,
+} from '../../services/index.js';
 import { FormatUtils, InteractionUtils, ShardUtils } from '../../utils/index.js';
 import { Command, CommandDeferType } from '../index.js';
 
@@ -26,7 +31,10 @@ export class DevCommand implements Command {
     public deferType = CommandDeferType.HIDDEN;
     public requireClientPerms: PermissionsString[] = [];
 
-    constructor(private presenceSettingsService: PresenceSettingsService) {}
+    constructor(
+        private presenceSettingsService: PresenceSettingsService,
+        private presenceUrlService: PresenceUrlService
+    ) {}
 
     public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
         if (!Config.developers.includes(intr.user.id)) {
@@ -135,26 +143,41 @@ export class DevCommand implements Command {
                     return;
                 }
 
-                if (url && !this.isSupportedStreamingUrl(url)) {
-                    await InteractionUtils.send(
-                        intr,
-                        'Streaming URL must be a Twitch or YouTube URL.'
-                    );
+                let streamingUrl = url
+                    ? await this.presenceUrlService.resolveStreamingUrl(url)
+                    : undefined;
+                if (streamingUrl?.type === 'none' && !streamingUrl.dynamic) {
+                    await InteractionUtils.send(intr, streamingUrl.reason);
                     return;
                 }
 
                 let activity: PresenceActivitySettings = {
                     type: activityType,
                     name,
-                    url: activityType === ActivityType.Streaming ? url : undefined,
+                    url: streamingUrl?.type === 'streaming' ? streamingUrl.url : undefined,
+                    urlSource:
+                        streamingUrl?.dynamic && activityType === ActivityType.Streaming
+                            ? url
+                            : undefined,
                 };
+                let activityToApply: PresenceActivitySettings =
+                    streamingUrl?.type === 'none' && streamingUrl.dynamic
+                        ? {
+                              type: ActivityType.Custom,
+                              name,
+                          }
+                        : activity;
 
                 await this.presenceSettingsService.setManual(activity, status);
-                await this.applyPresence(intr, activity, status);
+                await this.applyPresence(intr, activityToApply, status);
 
                 await InteractionUtils.send(
                     intr,
-                    `Presence set to ${activityTypeName}: ${name}${status ? ` (${status})` : ''}.`
+                    `Presence set to ${activityTypeName}: ${name}${status ? ` (${status})` : ''}${
+                        streamingUrl?.type === 'none' && streamingUrl.dynamic
+                            ? ' (not live now, showing Custom until it resolves)'
+                            : ''
+                    }.`
                 );
                 break;
             }
@@ -178,7 +201,7 @@ export class DevCommand implements Command {
                 await InteractionUtils.send(
                     intr,
                     activity
-                        ? `Presence mode: manual\nType: ${ActivityType[activity.type]}\nName: ${activity.name}\nURL: ${activity.url ?? Lang.getRef('other.na', data.lang)}\nStatus: ${settings.status ?? Lang.getRef('other.na', data.lang)}`
+                        ? `Presence mode: manual\nType: ${ActivityType[activity.type]}\nName: ${activity.name}\nURL: ${activity.url ?? Lang.getRef('other.na', data.lang)}\nURL source: ${activity.urlSource ?? Lang.getRef('other.na', data.lang)}\nStatus: ${settings.status ?? Lang.getRef('other.na', data.lang)}`
                         : 'Presence mode: manual, but no activity is stored.'
                 );
                 break;
@@ -231,28 +254,28 @@ export class DevCommand implements Command {
             serverCount = intr.client.guilds.cache.size;
         }
 
-        await this.applyPresence(intr, {
-            type: ActivityType.Streaming,
-            name: `to ${serverCount.toLocaleString(data.lang)} servers`,
-            url: Lang.getCom('links.stream'),
-        });
-        return true;
-    }
-
-    private isSupportedStreamingUrl(url: string): boolean {
-        let hostname: string;
-        try {
-            hostname = new URL(url).hostname.toLowerCase();
-        } catch {
-            return false;
-        }
-
-        return (
-            hostname === 'twitch.tv' ||
-            hostname.endsWith('.twitch.tv') ||
-            hostname === 'youtube.com' ||
-            hostname.endsWith('.youtube.com') ||
-            hostname === 'youtu.be'
+        let streamUrl = await this.presenceUrlService.resolveStreamingUrl(
+            Lang.getCom('links.stream')
         );
+        let activity =
+            streamUrl.type === 'streaming'
+                ? {
+                      type: ActivityType.Streaming,
+                      name: `to ${serverCount.toLocaleString(data.lang)} servers`,
+                      url: streamUrl.url,
+                  }
+                : undefined;
+
+        if (activity) {
+            await this.applyPresence(intr, activity);
+        } else if (intr.client.shard) {
+            await intr.client.shard.broadcastEval(client => {
+                let customClient = client as CustomClient;
+                return customClient.setPresence(undefined, 'online');
+            });
+        } else {
+            (intr.client as CustomClient).setPresence(undefined, 'online');
+        }
+        return true;
     }
 }

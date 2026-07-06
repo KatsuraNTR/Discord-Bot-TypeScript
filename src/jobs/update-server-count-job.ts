@@ -4,7 +4,13 @@ import { createRequire } from 'node:module';
 import { Job } from './index.js';
 import { CustomClient } from '../extensions/index.js';
 import { BotSite } from '../models/config-models.js';
-import { HttpService, Lang, Logger, PresenceSettingsService } from '../services/index.js';
+import {
+    HttpService,
+    Lang,
+    Logger,
+    PresenceSettingsService,
+    PresenceUrlService,
+} from '../services/index.js';
 import { ShardUtils } from '../utils/index.js';
 
 const require = createRequire(import.meta.url);
@@ -24,7 +30,8 @@ export class UpdateServerCountJob extends Job {
     constructor(
         private shardManager: ShardingManager,
         private httpService: HttpService,
-        private presenceSettingsService: PresenceSettingsService
+        private presenceSettingsService: PresenceSettingsService,
+        private presenceUrlService: PresenceUrlService
     ) {
         super();
         this.botSites = BotSites.filter(botSite => botSite.enabled);
@@ -35,29 +42,53 @@ export class UpdateServerCountJob extends Job {
         let serverCount = await ShardUtils.serverCount(this.shardManager);
 
         if (presenceSettings.mode === 'manual' && presenceSettings.activity) {
+            let activity = presenceSettings.activity;
+            if (activity.type === ActivityType.Streaming && activity.urlSource) {
+                let streamUrl = await this.presenceUrlService.resolveStreamingUrl(
+                    activity.urlSource
+                );
+                activity =
+                    streamUrl.type === 'streaming'
+                        ? {
+                              ...activity,
+                              url: streamUrl.url,
+                          }
+                        : {
+                              ...activity,
+                              type: ActivityType.Custom,
+                              url: undefined,
+                          };
+            }
+
             await this.shardManager.broadcastEval(
                 (client, context) => {
                     let customClient = client as CustomClient;
-                    return customClient.setPresence(context.activity, context.status);
+                    return customClient.setPresence(context.activity, context.status ?? 'online');
                 },
                 {
                     context: {
-                        activity: presenceSettings.activity,
+                        activity,
                         status: presenceSettings.status,
                     },
                 }
             );
         } else {
-            let activity = {
-                type: ActivityType.Streaming,
-                name: `to ${serverCount.toLocaleString()} servers`,
-                url: Lang.getCom('links.stream'),
-            };
+            let streamUrl = await this.presenceUrlService.resolveStreamingUrl(
+                Lang.getCom('links.stream')
+            );
+            let activity =
+                streamUrl.type === 'streaming'
+                    ? {
+                          type: ActivityType.Streaming,
+                          name: `to ${serverCount.toLocaleString()} servers`,
+                          url: streamUrl.url,
+                      }
+                    : undefined;
 
             await this.shardManager.broadcastEval(
                 (client, context) => {
                     let customClient = client as CustomClient;
-                    return customClient.setPresence(context.activity);
+                    return customClient.setPresence(context.activity, 'online');
                 },
                 { context: { activity } }
             );

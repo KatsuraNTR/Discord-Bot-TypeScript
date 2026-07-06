@@ -12,6 +12,8 @@ import {
     Logger,
     MasterApiService,
     PresenceSettingsService,
+    PresenceUrlService,
+    YouTubeService,
 } from './services/index.js';
 import { MathUtils, ShardUtils } from './utils/index.js';
 
@@ -27,6 +29,8 @@ async function start(): Promise<void> {
     let httpService = new HttpService();
     let masterApiService = new MasterApiService(httpService);
     let presenceSettingsService = new PresenceSettingsService();
+    let youtubeService = new YouTubeService();
+    let presenceUrlService = new PresenceUrlService(youtubeService);
     if (Config.clustering.enabled) {
         await masterApiService.register();
     }
@@ -70,7 +74,12 @@ async function start(): Promise<void> {
     let jobs: Job[] = [
         Config.clustering.enabled
             ? undefined
-            : new UpdateServerCountJob(shardManager, httpService, presenceSettingsService),
+            : new UpdateServerCountJob(
+                  shardManager,
+                  httpService,
+                  presenceSettingsService,
+                  presenceUrlService
+              ),
         // TODO: Add new jobs here
     ].filter(Boolean);
 
@@ -78,7 +87,7 @@ async function start(): Promise<void> {
 
     // API
     let guildsController = new GuildsController(shardManager);
-    let shardsController = new ShardsController(shardManager);
+    let shardsController = new ShardsController(shardManager, presenceUrlService);
     let rootController = new RootController();
     let api = new Api([guildsController, shardsController, rootController]);
 

@@ -11,7 +11,7 @@ import {
     ShardInfo,
     ShardStats,
 } from '../models/cluster-api/index.js';
-import { Logger } from '../services/index.js';
+import { Logger, PresenceUrlService } from '../services/index.js';
 
 const require = createRequire(import.meta.url);
 let Config = require('../../config/config.json');
@@ -22,7 +22,10 @@ export class ShardsController implements Controller {
     public router: Router = Router();
     public authToken: string = Config.api.secret;
 
-    constructor(private shardManager: ShardingManager) {}
+    constructor(
+        private shardManager: ShardingManager,
+        private presenceUrlService: PresenceUrlService
+    ) {}
 
     public register(): void {
         this.router.get('/', (req, res) => this.getShards(req, res));
@@ -84,10 +87,13 @@ export class ShardsController implements Controller {
             return;
         }
 
-        if (reqBody.url && !this.isSupportedStreamingUrl(reqBody.url)) {
+        let streamingUrl = reqBody.url
+            ? await this.presenceUrlService.resolveStreamingUrl(reqBody.url)
+            : undefined;
+        if (streamingUrl?.type === 'none') {
             res.status(400).json({
                 error: true,
-                message: 'Streaming URL must be a Twitch or YouTube URL.',
+                message: streamingUrl.reason,
             });
             return;
         }
@@ -102,7 +108,7 @@ export class ShardsController implements Controller {
                     activity: {
                         type: activityType,
                         name: reqBody.name,
-                        url: reqBody.url,
+                        url: streamingUrl?.type === 'streaming' ? streamingUrl.url : undefined,
                     },
                     status: reqBody.status as PresenceStatusData,
                 },
@@ -110,22 +116,5 @@ export class ShardsController implements Controller {
         );
 
         res.sendStatus(200);
-    }
-
-    private isSupportedStreamingUrl(url: string): boolean {
-        let hostname: string;
-        try {
-            hostname = new URL(url).hostname.toLowerCase();
-        } catch {
-            return false;
-        }
-
-        return (
-            hostname === 'twitch.tv' ||
-            hostname.endsWith('.twitch.tv') ||
-            hostname === 'youtube.com' ||
-            hostname.endsWith('.youtube.com') ||
-            hostname === 'youtu.be'
-        );
     }
 }

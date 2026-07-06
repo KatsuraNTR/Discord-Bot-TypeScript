@@ -48,6 +48,7 @@ import {
     JobService,
     Logger,
     PresenceSettingsService,
+    PresenceUrlService,
     WelcomeSettingsService,
     YouTubeService,
 } from './services/index.js';
@@ -63,6 +64,7 @@ async function start(): Promise<void> {
     let presenceSettingsService = new PresenceSettingsService();
     let welcomeSettingsService = new WelcomeSettingsService();
     let youtubeService = new YouTubeService();
+    let presenceUrlService = new PresenceUrlService(youtubeService);
 
     // Client
     let client = new CustomClient({
@@ -80,7 +82,7 @@ async function start(): Promise<void> {
     // Commands
     let commands: Command[] = [
         // Chat Commands
-        new DevCommand(presenceSettingsService),
+        new DevCommand(presenceSettingsService, presenceUrlService),
         new HelpCommand(),
         new InfoCommand(),
         new TestCommand(),

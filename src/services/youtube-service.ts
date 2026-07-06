@@ -114,7 +114,10 @@ export class YouTubeService {
         return subscription;
     }
 
-    public async unsubscribe(guildId: string, query: string): Promise<YouTubeSubscription | undefined> {
+    public async unsubscribe(
+        guildId: string,
+        query: string
+    ): Promise<YouTubeSubscription | undefined> {
         let normalizedQuery = query.trim().toLowerCase();
         let row = this.db
             .prepare(
@@ -193,9 +196,13 @@ export class YouTubeService {
         this.insertNotification(subscriptionId, video.videoId, video.type);
     }
 
-    public async getLatestVideo(subscription: YouTubeSubscription): Promise<YouTubeVideo | undefined> {
+    public async getLatestVideo(
+        subscription: YouTubeSubscription
+    ): Promise<YouTubeVideo | undefined> {
         let videos = await this.fetchRecentVideos(subscription.youtubeChannelId);
-        return videos.find(video => this.shouldNotify(subscription.notify, video.type)) ?? videos[0];
+        return (
+            videos.find(video => this.shouldNotify(subscription.notify, video.type)) ?? videos[0]
+        );
     }
 
     public buildNotificationMessage(
@@ -510,7 +517,9 @@ export class YouTubeService {
         }
 
         if (!this.apiKey) {
-            throw new Error('A YouTube API key is required for handles, custom URLs, and usernames.');
+            throw new Error(
+                'A YouTube API key is required for handles, custom URLs, and usernames.'
+            );
         }
 
         let query = input.trim().replace(/^https?:\/\/(www\.)?youtube\.com\//i, '');
@@ -555,6 +564,36 @@ export class YouTubeService {
                 item.snippet?.thumbnails?.medium?.url ??
                 item.snippet?.thumbnails?.default?.url,
         };
+    }
+
+    public async resolveCurrentLiveVideoUrl(input: string): Promise<string | undefined> {
+        let channel = await this.resolveChannel(this.normalizeLiveChannelInput(input));
+        let videos = await this.fetchRecentVideos(channel.id);
+        let liveVideo = videos.find(video => video.type === 'live');
+        return liveVideo ? this.buildVideoUrl(liveVideo.videoId) : undefined;
+    }
+
+    private normalizeLiveChannelInput(input: string): string {
+        let trimmed = input.trim();
+        try {
+            let url = new URL(trimmed);
+            if (this.isYouTubeHost(url.hostname) && /^\/@[^/]+\/live\/?$/i.test(url.pathname)) {
+                return url.pathname.split('/')[1];
+            }
+        } catch {
+            // Keep non-URL input as-is for the existing channel resolver.
+        }
+
+        return trimmed;
+    }
+
+    private isYouTubeHost(hostname: string): boolean {
+        let normalized = hostname.toLowerCase();
+        return (
+            normalized === 'youtube.com' ||
+            normalized === 'www.youtube.com' ||
+            normalized.endsWith('.youtube.com')
+        );
     }
 
     private parseChannelId(input: string): string | undefined {
@@ -686,6 +725,10 @@ export class YouTubeService {
         return `https://www.youtube.com/channel/${channelId}`;
     }
 
+    private buildVideoUrl(videoId: string): string {
+        return `https://www.youtube.com/watch?v=${videoId}`;
+    }
+
     private async fetchRecentVideosFromApiSearch(channelId: string): Promise<YouTubeVideo[]> {
         let url = new URL('https://www.googleapis.com/youtube/v3/search');
         url.searchParams.set('part', 'snippet');
@@ -775,7 +818,9 @@ export class YouTubeService {
                 channelTitle:
                     this.extractXml(entry, 'author>\\s*<name') ?? this.extractXml(xml, 'title'),
                 title: this.extractXml(entry, 'title') ?? videoId,
-                url: this.extractXmlAttribute(entry, 'link', 'href') ?? `https://youtu.be/${videoId}`,
+                url:
+                    this.extractXmlAttribute(entry, 'link', 'href') ??
+                    `https://youtu.be/${videoId}`,
                 publishedAt: this.extractXml(entry, 'published'),
                 updatedAt: this.extractXml(entry, 'updated'),
                 thumbnailUrl: this.extractXmlAttribute(entry, 'media:thumbnail', 'url'),
@@ -800,7 +845,7 @@ export class YouTubeService {
             .replaceAll('&lt;', '<')
             .replaceAll('&gt;', '>')
             .replaceAll('&quot;', '"')
-            .replaceAll('&#39;', '\'');
+            .replaceAll('&#39;', String.fromCharCode(39));
     }
 
     private shouldNotify(notify: YouTubeNotifyType, type: YouTubeVideoType): boolean {
@@ -834,9 +879,9 @@ export class YouTubeService {
     private getVideoEventTime(video: YouTubeVideo): number | undefined {
         let timestamp =
             video.type === 'live'
-                ? video.actualStartTime ?? video.publishedAt
+                ? (video.actualStartTime ?? video.publishedAt)
                 : video.type === 'upcoming_live'
-                  ? video.scheduledStartTime ?? video.publishedAt
+                  ? (video.scheduledStartTime ?? video.publishedAt)
                   : video.publishedAt;
 
         if (!timestamp) {

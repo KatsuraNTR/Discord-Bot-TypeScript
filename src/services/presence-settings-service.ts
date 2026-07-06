@@ -12,6 +12,7 @@ export interface PresenceActivitySettings {
     type: ActivityType;
     name: string;
     url?: string;
+    urlSource?: string;
 }
 
 export interface PresenceSettings {
