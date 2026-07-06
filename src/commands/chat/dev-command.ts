@@ -157,7 +157,7 @@ export class DevCommand implements Command {
                     url: streamingUrl?.type === 'streaming' ? streamingUrl.url : undefined,
                     urlSource:
                         streamingUrl?.dynamic && activityType === ActivityType.Streaming
-                            ? url
+                            ? (streamingUrl.urlSource ?? url)
                             : undefined,
                 };
                 let activityToApply: PresenceActivitySettings =

@@ -47,14 +47,35 @@ export class UpdateServerCountJob extends Job {
                 let streamUrl = await this.presenceUrlService.resolveStreamingUrl(
                     activity.urlSource
                 );
+                let storedActivity =
+                    streamUrl.urlSource && streamUrl.urlSource !== activity.urlSource
+                        ? {
+                              ...activity,
+                              urlSource: streamUrl.urlSource,
+                          }
+                        : activity;
+                if (streamUrl.type === 'streaming') {
+                    storedActivity = {
+                        ...storedActivity,
+                        url: streamUrl.url,
+                    };
+                }
+
+                if (storedActivity !== activity) {
+                    await this.presenceSettingsService.setManual(
+                        storedActivity,
+                        presenceSettings.status
+                    );
+                }
+
                 activity =
                     streamUrl.type === 'streaming'
                         ? {
-                              ...activity,
+                              ...storedActivity,
                               url: streamUrl.url,
                           }
                         : {
-                              ...activity,
+                              ...storedActivity,
                               type: ActivityType.Custom,
                               url: undefined,
                           };

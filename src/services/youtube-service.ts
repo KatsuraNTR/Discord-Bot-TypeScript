@@ -567,10 +567,25 @@ export class YouTubeService {
     }
 
     public async resolveCurrentLiveVideoUrl(input: string): Promise<string | undefined> {
-        let channel = await this.resolveChannel(this.normalizeLiveChannelInput(input));
-        let videos = await this.fetchRecentVideos(channel.id);
+        let channelInput = this.normalizeLiveChannelInput(input);
+        let channelId = this.parseChannelId(channelInput);
+        if (!channelId) {
+            channelId = (await this.resolveChannel(channelInput)).id;
+        }
+
+        let videos = await this.fetchRecentVideos(channelId);
         let liveVideo = videos.find(video => video.type === 'live');
         return liveVideo ? this.buildVideoUrl(liveVideo.videoId) : undefined;
+    }
+
+    public async resolveLiveChannelSource(input: string): Promise<string> {
+        let channelInput = this.normalizeLiveChannelInput(input);
+        let channelId = this.parseChannelId(channelInput);
+        if (!channelId) {
+            channelId = (await this.resolveChannel(channelInput)).id;
+        }
+
+        return `${this.buildChannelUrl(channelId)}/live`;
     }
 
     private normalizeLiveChannelInput(input: string): string {

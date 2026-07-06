@@ -5,14 +5,18 @@ export type PresenceStreamingUrlResolution =
           type: 'streaming';
           url: string;
           dynamic: boolean;
+          urlSource?: string;
       }
     | {
           type: 'none';
           reason: string;
           dynamic?: boolean;
+          urlSource?: string;
       };
 
 export class PresenceUrlService {
+    private resolvedUrlSources = new Map<string, string>();
+
     constructor(private youtubeService: YouTubeService) {}
 
     public async resolveStreamingUrl(input?: string): Promise<PresenceStreamingUrlResolution> {
@@ -32,27 +36,36 @@ export class PresenceUrlService {
         }
 
         if (this.isYouTubeHost(url.hostname)) {
-            return await this.resolveYouTubeUrl(url);
+            return await this.resolveYouTubeUrl(input, url);
         }
 
         return { type: 'none', reason: 'Stream URL is not a Twitch or YouTube URL.' };
     }
 
-    private async resolveYouTubeUrl(url: URL): Promise<PresenceStreamingUrlResolution> {
+    private async resolveYouTubeUrl(
+        input: string,
+        url: URL
+    ): Promise<PresenceStreamingUrlResolution> {
         let videoId = this.getYouTubeVideoId(url);
         if (videoId) {
             return { type: 'streaming', url: this.buildYouTubeVideoUrl(videoId), dynamic: false };
         }
 
-        if (/^\/@[^/]+\/live\/?$/i.test(url.pathname)) {
+        if (this.isYouTubeLiveChannelUrl(url)) {
             try {
-                let liveUrl = await this.youtubeService.resolveCurrentLiveVideoUrl(url.toString());
+                let urlSource =
+                    this.resolvedUrlSources.get(input) ??
+                    (await this.youtubeService.resolveLiveChannelSource(url.toString()));
+                this.resolvedUrlSources.set(input, urlSource);
+
+                let liveUrl = await this.youtubeService.resolveCurrentLiveVideoUrl(urlSource);
                 return liveUrl
-                    ? { type: 'streaming', url: liveUrl, dynamic: true }
+                    ? { type: 'streaming', url: liveUrl, dynamic: true, urlSource }
                     : {
                           type: 'none',
                           reason: 'YouTube channel is not live right now.',
                           dynamic: true,
+                          urlSource,
                       };
             } catch (error) {
                 return {
@@ -79,6 +92,14 @@ export class PresenceUrlService {
         if (this.isYouTubeHost(url.hostname) && url.pathname === '/watch') {
             return this.normalizeVideoId(url.searchParams.get('v'));
         }
+    }
+
+    private isYouTubeLiveChannelUrl(url: URL): boolean {
+        return (
+            this.isYouTubeHost(url.hostname) &&
+            (/^\/@[^/]+\/live\/?$/i.test(url.pathname) ||
+                /^\/channel\/UC[\w-]{22,}\/live\/?$/i.test(url.pathname))
+        );
     }
 
     private normalizeVideoId(videoId?: string | null): string | undefined {
